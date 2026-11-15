@@ -1,0 +1,54 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  commits:
+    name: Conventional Commits
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      # Komit (.komit.yml) on the PR title, which becomes the commit on main (squash
+      # merge), and on every commit in the PR. Passed through env, never interpolated
+      # into the script.
+      - name: Pull request title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: mvn -B -ntp -q komit:check -Dkomit.message="${TITLE}"
+      - name: Each commit
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          for sha in $(git rev-list --no-merges "${BASE}..${HEAD}"); do
+            echo "::group::$(git log -1 --format='%h %s' "${sha}")"
+            mvn -B -ntp -q komit:check -Dkomit.message="$(git log -1 --format=%B "${sha}")"
+            echo "::endgroup::"
+          done
+
+  test:
+    name: Unit and integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - run: mvn -B -ntp verify
+      - run: scripts/integration-test.sh
