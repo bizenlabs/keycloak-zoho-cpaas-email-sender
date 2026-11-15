@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  A Keycloak email sender that posts to the Zoho CPaaS (formerly ZeptoMail) email
+  API over HTTPS instead of SMTP. README.md says how to install and configure it.
+
+  Built against one Keycloak version at a time (keycloak.version, overridable with
+  -Dkeycloak.version=...): the email sender interface lives in Keycloak's internal
+  SPI, which may change between releases, so a release of this jar names the
+  Keycloak it was built and tested against.
+
+  Every Keycloak dependency is `provided`: the server already has them, and a jar
+  that shipped its own copies would shadow them. Beyond the JDK it needs nothing:
+  the HTTP client is java.net.http and the JSON is Keycloak's own Jackson wrapper.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.bizenlabs.keycloak</groupId>
+  <artifactId>keycloak-zoho-cpaas-email-sender</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+  <name>Keycloak email sender for Zoho CPaaS</name>
+  <description>Sends Keycloak's email through the Zoho CPaaS (formerly ZeptoMail) email API over HTTPS, for hosts that block SMTP ports.</description>
+  <url>https://github.com/bizenlabs/keycloak-zoho-cpaas-email-sender</url>
+
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <organization>
+    <name>BizenLabs</name>
+  </organization>
+
+  <scm>
+    <url>https://github.com/bizenlabs/keycloak-zoho-cpaas-email-sender</url>
+    <connection>scm:git:https://github.com/bizenlabs/keycloak-zoho-cpaas-email-sender.git</connection>
+  </scm>
+
+  <properties>
+    <keycloak.version>26.8.2</keycloak.version>
+    <!-- Keycloak's image runs on OpenJDK 21. -->
+    <maven.compiler.release>21</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <junit.version>5.13.4</junit.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-server-spi</artifactId>
+      <version>${keycloak.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-server-spi-private</artifactId>
+      <version>${keycloak.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-core</artifactId>
+      <version>${keycloak.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.logging</groupId>
+      <artifactId>jboss-logging</artifactId>
+      <version>3.6.1.Final</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>keycloak-zoho-cpaas-email-sender-${project.version}-keycloak-${keycloak.version}</finalName>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+      <!-- The licence travels inside the jar. -->
+      <resource>
+        <directory>${project.basedir}</directory>
+        <targetPath>META-INF</targetPath>
+        <includes>
+          <include>LICENSE</include>
+          <include>NOTICE</include>
+        </includes>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.14.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.3</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.4.2</version>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Implementation-Title>${project.name}</Implementation-Title>
+              <Implementation-Version>${project.version}</Implementation-Version>
+              <Implementation-Vendor>BizenLabs</Implementation-Vendor>
+              <Built-Against-Keycloak>${keycloak.version}</Built-Against-Keycloak>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
