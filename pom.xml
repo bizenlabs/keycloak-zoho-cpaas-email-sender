@@ -101,6 +101,14 @@
       </resource>
     </resources>
     <plugins>
+      <!-- Commit conventions (.komit.yml): `mvn komit:check -Dkomit.message="..."`, and
+           `mvn komit:install-hooks` for a commit-msg hook. Not bound to any phase, so a
+           build never touches your git hooks unasked. -->
+      <plugin>
+        <groupId>dev.kgidwani</groupId>
+        <artifactId>komit-maven-plugin</artifactId>
+        <version>0.1.1</version>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>

@@ -1,0 +1,8 @@
+# Commit conventions, checked by Komit (https://github.com/kgidwani/komit) in CI on the
+# pull request title (the squash-merge commit) and on every commit in the pull request.
+# Run `mvn komit:install-hooks` once to have them checked as you commit.
+extends:
+  - conventional
+rules:
+  type-enum: [2, "always", [feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert]]
+  header-max-length: [2, "always", 100]
